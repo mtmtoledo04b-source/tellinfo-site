@@ -1,4 +1,4 @@
-name: Deploy via SSH
+name: .github/workflows/deploy.yml
 
 on:
   workflow_dispatch:
