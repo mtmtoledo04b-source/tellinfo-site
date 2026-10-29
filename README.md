@@ -1,4 +1,4 @@
-name: Deploy via yml
+name: deploy.yml
 
 on:
   workflow_dispatch:
