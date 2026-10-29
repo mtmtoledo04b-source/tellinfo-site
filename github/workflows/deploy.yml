@@ -1,5 +1,4 @@
-name: .github/workflows/deploy.yml
-
+name:.github/workflows/deploy.yml
 on:
   workflow_dispatch:
 
