@@ -41,6 +41,7 @@ jobs:
 
 
 
+      - name: Back up current site
         id: backup
         uses: appleboy/ssh-action@v1
         env:
