@@ -18,7 +18,7 @@ jobs:
           SFTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
           SFTP_FINGERPRINT: ${{ secrets.SFTP_FINGERPRINT }}
           SFTP_REMOTE_DIR: ${{ secrets.SFTP_REMOTE_DIR }}
-          SFTP_BACKUP_DIR: ${{ secrets.SFTP_BACKUP_DIR }}
+          SFTP_BACKUP_DIR: /tmp
         run: |
           set -eu
           test -n "$SFTP_HOST" || { echo "Missing SFTP_HOST secret"; exit 1; }
@@ -42,8 +42,8 @@ jobs:
         uses: appleboy/ssh-action@v1
         env:
           TARGET_DIR: ${{ secrets.SFTP_REMOTE_DIR }}
-          BACKUP_DIR: ${{ secrets.SFTP_BACKUP_DIR }}
-          RUN_ID: ${{ github.run_id }}
+          BACKUP_DIR: /tmp
+          RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}
         with:
           host: ${{ secrets.SFTP_HOST }}
           username: ${{ secrets.SFTP_USER }}
@@ -67,15 +67,15 @@ jobs:
             test -d "$target_dir"
             mkdir -p "$backup_dir"
             backup_path="$backup_dir/tellinfo-$RUN_ID"
-            mkdir "$backup_path"
+            mkdir -m 700 "$backup_path"
             cp -a "$target_dir/." "$backup_path/"
 
       - name: Remove old site after backup
         uses: appleboy/ssh-action@v1
         env:
           TARGET_DIR: ${{ secrets.SFTP_REMOTE_DIR }}
-          BACKUP_DIR: ${{ secrets.SFTP_BACKUP_DIR }}
-          RUN_ID: ${{ github.run_id }}
+          BACKUP_DIR: /tmp
+          RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}
         with:
           host: ${{ secrets.SFTP_HOST }}
           username: ${{ secrets.SFTP_USER }}
@@ -115,8 +115,8 @@ jobs:
         uses: appleboy/ssh-action@v1
         env:
           TARGET_DIR: ${{ secrets.SFTP_REMOTE_DIR }}
-          BACKUP_DIR: ${{ secrets.SFTP_BACKUP_DIR }}
-          RUN_ID: ${{ github.run_id }}
+          BACKUP_DIR: /tmp
+          RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}
         with:
           host: ${{ secrets.SFTP_HOST }}
           username: ${{ secrets.SFTP_USER }}
