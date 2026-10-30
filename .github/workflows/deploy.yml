@@ -41,6 +41,28 @@ jobs:
 
 
 
+      - name: Inspect SFTP account directories (read-only)
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1
+        env:
+          TARGET_DIR: ${{ secrets.SFTP_REMOTE_DIR }}
+        with:
+          host: ${{ secrets.SFTP_HOST }}
+          username: ${{ secrets.SFTP_USER }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          fingerprint: ${{ secrets.SFTP_FINGERPRINT }}
+          port: 22
+          envs: TARGET_DIR
+          script: |
+            set -eu
+            printf 'ACCOUNT_HOME=%s\n' "$HOME"
+            find "$HOME" -maxdepth 4 -type f -name index.html -print 2>/dev/null | while IFS= read -r file; do
+              printf 'INDEX_FILE=%s\n' "$file"
+              grep -im1 '<title>' "$file" | cut -c1-160 || true
+            done
+            for candidate in "$HOME" "$HOME/public_html" "$HOME/www" "$HOME/htdocs" "$HOME/www.tellinfo.com.br" "$HOME/tellinfo.com.br"; do
+              if [ -d "$candidate" ]; then printf 'WEBROOT_CANDIDATE=%s\n' "$candidate"; fi
+            done
+
       - name: Back up current site
         id: backup
         uses: appleboy/ssh-action@v1
