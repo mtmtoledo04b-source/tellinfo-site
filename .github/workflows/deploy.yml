@@ -36,6 +36,10 @@ jobs:
           cp index.html dist/
           test -f assets/tellinfo-logo.png || { echo "Missing assets/tellinfo-logo.png"; exit 1; }
           cp -R assets dist/
+          printf '<!-- TellInfo deployment: %s -->' "$GITHUB_SHA" >> dist/index.html
+
+
+
 
       - name: Back up current site
         id: backup
@@ -104,11 +108,28 @@ jobs:
           target: ${{ secrets.SFTP_REMOTE_DIR }}
           strip_components: 1
 
-      - name: Verify published site
-        run: |
-          set -euo pipefail
-          curl --fail --silent --show-error --location --max-time 30 https://www.tellinfo.com.br/ |
-            grep -Fq '<title>TellInfo | Tecnologia que impulsiona o seu negócio</title>'
+      - name: Verify deployed files over authenticated SSH
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1
+        env:
+          TARGET_DIR: ${{ secrets.SFTP_REMOTE_DIR }}
+          DEPLOYMENT_SHA: ${{ github.sha }}
+        with:
+          host: ${{ secrets.SFTP_HOST }}
+          username: ${{ secrets.SFTP_USER }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          fingerprint: ${{ secrets.SFTP_FINGERPRINT }}
+          port: 22
+          envs: TARGET_DIR,DEPLOYMENT_SHA
+          script: |
+            set -eu
+            test "$TARGET_DIR" = "/home/tellinfo1" || { echo "Unexpected public directory"; exit 1; }
+            test -s "$TARGET_DIR/index.html" || { echo "Published index.html is missing"; exit 1; }
+            grep -Fq "<!-- TellInfo deployment: $DEPLOYMENT_SHA -->" "$TARGET_DIR/index.html" || {
+              echo "Published deployment SHA does not match this run"
+              exit 1
+            }
+            test -f "$TARGET_DIR/assets/tellinfo-logo.png" || { echo "Published logo is missing"; exit 1; }
+
 
       - name: Restore backup if deployment fails
         if: failure() && steps.backup.outcome == 'success'
