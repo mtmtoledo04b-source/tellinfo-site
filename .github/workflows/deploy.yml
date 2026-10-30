@@ -15,7 +15,7 @@ jobs:
         env:
           SFTP_HOST: ${{ secrets.SFTP_HOST }}
           SFTP_USER: ${{ secrets.SFTP_USER }}
-          SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
+          SFTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
           SFTP_FINGERPRINT: ${{ secrets.SFTP_FINGERPRINT }}
           SFTP_REMOTE_DIR: ${{ secrets.SFTP_REMOTE_DIR }}
           SFTP_BACKUP_DIR: ${{ secrets.SFTP_BACKUP_DIR }}
@@ -47,7 +47,7 @@ jobs:
         with:
           host: ${{ secrets.SFTP_HOST }}
           username: ${{ secrets.SFTP_USER }}
-          password: ${{ secrets.SFTP_PASSWORD }}
+          password: ${{ secrets.FTP_PASSWORD }}
           fingerprint: ${{ secrets.SFTP_FINGERPRINT }}
           port: 22
           envs: TARGET_DIR,BACKUP_DIR,RUN_ID
@@ -79,7 +79,7 @@ jobs:
         with:
           host: ${{ secrets.SFTP_HOST }}
           username: ${{ secrets.SFTP_USER }}
-          password: ${{ secrets.SFTP_PASSWORD }}
+          password: ${{ secrets.FTP_PASSWORD }}
           fingerprint: ${{ secrets.SFTP_FINGERPRINT }}
           port: 22
           envs: TARGET_DIR,BACKUP_DIR,RUN_ID
@@ -97,7 +97,7 @@ jobs:
         with:
           host: ${{ secrets.SFTP_HOST }}
           username: ${{ secrets.SFTP_USER }}
-          password: ${{ secrets.SFTP_PASSWORD }}
+          password: ${{ secrets.FTP_PASSWORD }}
           fingerprint: ${{ secrets.SFTP_FINGERPRINT }}
           port: 22
           source: "dist/*"
@@ -120,7 +120,7 @@ jobs:
         with:
           host: ${{ secrets.SFTP_HOST }}
           username: ${{ secrets.SFTP_USER }}
-          password: ${{ secrets.SFTP_PASSWORD }}
+          password: ${{ secrets.FTP_PASSWORD }}
           fingerprint: ${{ secrets.SFTP_FINGERPRINT }}
           port: 22
           envs: TARGET_DIR,BACKUP_DIR,RUN_ID
