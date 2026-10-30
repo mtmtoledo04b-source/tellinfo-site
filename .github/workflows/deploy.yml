@@ -26,7 +26,7 @@ jobs:
           test -n "$SFTP_PASSWORD" || { echo "Missing SFTP_PASSWORD secret"; exit 1; }
           test -n "$SFTP_FINGERPRINT" || { echo "Missing SFTP_FINGERPRINT secret"; exit 1; }
           test -n "$SFTP_REMOTE_DIR" || { echo "Missing SFTP_REMOTE_DIR secret"; exit 1; }
-          test -n "$SFTP_BACKUP_DIR" || { echo "Missing SFTP_BACKUP_DIR secret"; exit 1; }
+          test -n "$SFTP_BACKUP_DIR" || { echo "Missing backup directory"; exit 1; }
           case "$SFTP_REMOTE_DIR" in /*) ;; *) echo "SFTP_REMOTE_DIR must be absolute"; exit 1 ;; esac
           case "$SFTP_BACKUP_DIR" in /*) ;; *) echo "SFTP_BACKUP_DIR must be absolute"; exit 1 ;; esac
 
@@ -54,7 +54,7 @@ jobs:
           script: |
             set -eu
             : "${TARGET_DIR:?Missing SFTP_REMOTE_DIR secret}"
-            : "${BACKUP_DIR:?Missing SFTP_BACKUP_DIR secret}"
+            : "${BACKUP_DIR:?Missing backup directory}"
             target_dir="${TARGET_DIR%/}"
             backup_dir="${BACKUP_DIR%/}"
             test "$target_dir" = "/home/tellinfo1" || { echo "Unexpected public directory"; exit 1; }
@@ -68,7 +68,7 @@ jobs:
             mkdir -p "$backup_dir"
             backup_path="$backup_dir/tellinfo-$RUN_ID"
             mkdir -m 700 "$backup_path"
-            cp -a "$target_dir/." "$backup_path/"
+            find "$target_dir" -mindepth 1 -maxdepth 1 ! -name logs -exec cp -a -- {} "$backup_path/" \;
 
       - name: Remove old site after backup
         uses: appleboy/ssh-action@v1
@@ -89,7 +89,7 @@ jobs:
             backup_path="${BACKUP_DIR%/}/tellinfo-$RUN_ID"
             test "$target_dir" = "/home/tellinfo1" || { echo "Unexpected public directory"; exit 1; }
             test -d "$backup_path" || { echo "Backup is missing; refusing to remove the current site"; exit 1; }
-            find "$target_dir" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
+            find "$target_dir" -mindepth 1 -maxdepth 1 ! -name logs -exec rm -rf -- {} +
 
       - name: Upload site via SSH
         id: upload
@@ -130,5 +130,5 @@ jobs:
             backup_path="${BACKUP_DIR%/}/tellinfo-$RUN_ID"
             test "$target_dir" = "/home/tellinfo1" || { echo "Unexpected public directory"; exit 1; }
             test -d "$backup_path" || { echo "Backup is missing; refusing to restore"; exit 1; }
-            find "$target_dir" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
+            find "$target_dir" -mindepth 1 -maxdepth 1 ! -name logs -exec rm -rf -- {} +
             cp -a "$backup_path/." "$target_dir/"
